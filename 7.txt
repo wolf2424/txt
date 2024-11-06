@@ -1,0 +1,35 @@
+import numpy as np
+import pandas as pd
+from pgmpy.estimators import MaximumLikelihoodEstimator
+from pgmpy.models import BayesianNetwork
+from pgmpy.inference import VariableElimination
+
+data = pd.read_csv("F:\BE\My Cl2\I3\heartdisease.csv")
+heart_disease = pd.DataFrame(data)
+print("Dataset loaded successfully.\n")
+
+print("Sample instances from the dataset:")
+print(heart_disease.head(), "\n")
+print("Attributes and their datatypes:")
+print(heart_disease.dtypes, "\n")
+
+model = BayesianNetwork([
+    ('age', 'cholestrol'),  # Using 'cholestrol' instead of 'chol'
+    ('Gender', 'heartdisease'),  # Using 'Gender' instead of 'sex'
+    ('Family', 'heartdisease'),  # Assuming Family affects heartdisease
+    ('diet', 'heartdisease'),  # Assuming diet affects heartdisease
+    ('Lifestyle', 'heartdisease'),  # Assuming Lifestyle affects heartdisease
+])
+
+print("Learning CPD using Maximum Likelihood Estimator...")
+model.fit(heart_disease, estimator=MaximumLikelihoodEstimator)
+
+HeartDisease_infer = VariableElimination(model)
+
+print("\n1. Probability of Heart Disease given evidence age=2:")
+q1 = HeartDisease_infer.query(variables=['heartdisease'], evidence={'age': 2})
+print(q1)
+
+print("\n2. Probability of Heart Disease given evidence cholestrol=1:")
+q2 = HeartDisease_infer.query(variables=['heartdisease'], evidence={'cholestrol': 1})
+print(q2)
