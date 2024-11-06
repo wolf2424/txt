@@ -1,0 +1,37 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.preprocessing import LabelEncoder
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+
+df = pd.read_csv(r"F:\BE\My Cl2\I5\email_spam.csv")
+
+df.drop_duplicates(inplace=True)
+print("Duplicates removed.")
+
+le = LabelEncoder()
+df['spam'] = le.fit_transform(df['type'])
+
+df['text'] = df['text'].replace("\n", "", regex=True)
+
+x_train, x_test, y_train, y_test = train_test_split(df['text'], df['spam'], test_size=0.1, random_state=42)
+
+vectorizer = CountVectorizer()
+x_train_count = vectorizer.fit_transform(x_train.values)
+x_test_count = vectorizer.transform(x_test.values)
+
+knn_model = KNeighborsClassifier(n_neighbors=3)
+knn_model.fit(x_train_count, y_train)
+
+accuracy = knn_model.score(x_test_count, y_test)
+print(f"Model accuracy: {accuracy }")
+
+email = ['50% discount on data science courses signup now']
+new_email_count = vectorizer.transform(email)
+prediction = knn_model.predict(new_email_count)
+
+if prediction[0] == 1:
+    print("The email is Spam.")
+else:
+    print("The email is Not Spam.")
