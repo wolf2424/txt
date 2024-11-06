@@ -1,0 +1,39 @@
+import re
+from collections import defaultdict
+
+documents = {
+    1: "This is the first document. It contains some text.",
+    2: "The second document is longer. It also contains some text.",
+    3: "This is the third document. It is different from the first two.",
+}
+
+def preprocess_document(doc):
+    
+    tokens = re.findall(r'\w+', doc.lower())
+    
+    stop_words = {"is", "the", "it", "and", "some"}
+    return [token for token in tokens if token not in stop_words]
+
+inverted_index = defaultdict(list)
+for doc_id, doc_text in documents.items():
+    tokens = preprocess_document(doc_text)
+    for token in tokens:
+        inverted_index[token].append(doc_id)
+
+def retrieve_documents(query):
+    query_tokens = preprocess_document(query)
+    result = set()
+    for token in query_tokens:
+        if token in inverted_index:
+            result.update(inverted_index[token])
+    return list(result)
+
+query = "document contains text"
+matching_documents = retrieve_documents(query)
+
+if matching_documents:
+    print("Matching documents for query:", query)
+    for doc_id in matching_documents:
+        print("Document", doc_id, ":", documents[doc_id])
+else:
+    print("No matching documents found.")
