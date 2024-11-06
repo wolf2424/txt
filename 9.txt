@@ -1,0 +1,29 @@
+import numpy as np 
+import matplotlib.pyplot as plt
+from sklearn import datasets
+from sklearn.cluster import AgglomerativeClustering
+from scipy.cluster.hierarchy import dendrogram, linkage
+
+# Load the Iris dataset
+iris = datasets.load_iris()
+X = iris.data
+
+# Step 1: Generate the linkage matrix and plot dendrogram
+linkage_matrix = linkage(X, method='ward')  # "ward" linkage minimizes variance within clusters
+
+plt.figure(figsize=(10, 6))
+dendrogram(linkage_matrix)
+plt.title('Hierarchical Clustering Dendrogram')
+plt.xlabel("Sample index")
+plt.ylabel("Distance")
+plt.show()
+
+# Step 2: Fit the Agglomerative Clustering model
+num_clusters = 3  # Define the number of clusters
+agg_clustering = AgglomerativeClustering(n_clusters=num_clusters, linkage='ward')
+cluster_labels = agg_clustering.fit_predict(X)
+
+# Display results
+print("Cluster assignments:")
+for i, label in enumerate(cluster_labels):
+    print(f"Data point {i} is in cluster {label}")
