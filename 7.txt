@@ -1,0 +1,52 @@
+import numpy as np
+import pandas as pd
+from pgmpy.estimators import MaximumLikelihoodEstimator
+from pgmpy.models import BayesianNetwork
+from pgmpy.inference import VariableElimination
+
+data = pd.read_csv(r"F:\BE\Cl2\I3\heartdisease.csv")
+heart_disease = pd.DataFrame(data)
+
+print("Sample instances from the dataset:")
+print(heart_disease.head(), "\n")
+print("Attributes and their datatypes:")
+print(heart_disease.dtypes, "\n")
+
+model = BayesianNetwork([
+    ('age', 'cholestrol'),  # Cholesterol depends on age
+    ('Gender', 'heartdisease'),  # Gender affects heart disease
+    ('Family', 'heartdisease'),  # Family history affects heart disease
+    ('diet', 'heartdisease'),  # Diet affects heart disease
+    ('Lifestyle', 'heartdisease'),  # Lifestyle choices affect heart disease
+    ('cholestrol', 'heartdisease'),  # Cholesterol level affects heart disease
+])
+
+
+print("Learning CPD using Maximum Likelihood Estimator...")
+model.fit(heart_disease, estimator=MaximumLikelihoodEstimator)
+
+HeartDisease_infer = VariableElimination(model)
+
+print("Unique values for 'age' and 'cholestrol' columns:")
+print(heart_disease['age'].unique())
+print(heart_disease['cholestrol'].unique())
+
+print("\n1. Probability of Heart Disease given evidence age=2:")
+q1 = HeartDisease_infer.query(variables=['heartdisease'], evidence={'age': 2})
+print(q1)
+
+print("\n2. Probability of Heart Disease given evidence cholestrol=1:")
+q2 = HeartDisease_infer.query(variables=['heartdisease'], evidence={'cholestrol': 1})
+print(q2)
+
+print("\n3. Probability of Heart Disease given evidence age=2 and cholestrol=1:")
+q3 = HeartDisease_infer.query(variables=['heartdisease'], evidence={'age': 2, 'cholestrol': 1})
+print(q3)
+
+print("\n4. Probability of Heart Disease given evidence age=3 and cholestrol=2:")
+q4 = HeartDisease_infer.query(variables=['heartdisease'], evidence={'age': 3, 'cholestrol': 2})
+print(q4)
+
+print("\nCPDs learned by the model:")
+for cpd in model.get_cpds():
+    print(cpd)
